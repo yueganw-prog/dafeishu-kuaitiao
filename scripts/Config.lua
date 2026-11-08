@@ -124,17 +124,20 @@ Config.Fx = {
 
 -- ---------------------------------------------------------------------------
 -- 音效（文件契约：把同名 WAV 放进 assets/Sounds/ 即自动生效；缺文件静默跳过）
+-- 注意：sounds 表里只保留 assets/Sounds/ 下实际存在的文件——
+-- 列了不存在的文件会让引擎 GetResource 在启动时打 ERROR（进平台错误报告）。
+-- 补素材后把对应行加回来即可：flap/shield/nearmiss/fire 目前素材未到位。
 -- ---------------------------------------------------------------------------
 Config.Audio = {
     enabled = true,
     sounds = {
-        flap     = { path = "Sounds/flap.wav",     gain = 0.50, pitchVar = 0.05 },
         pickup   = { path = "Sounds/pickup.wav",   gain = 0.55, pitchVar = 0.0  },
         powerup  = { path = "Sounds/powerup.wav",  gain = 0.60, pitchVar = 0.0  },
-        shield   = { path = "Sounds/shield.wav",   gain = 0.60, pitchVar = 0.0  },
-        nearmiss = { path = "Sounds/nearmiss.wav", gain = 0.45, pitchVar = 0.04 },
-        fire     = { path = "Sounds/fire.wav",     gain = 0.60, pitchVar = 0.0  },
         crash    = { path = "Sounds/crash.wav",    gain = 0.75, pitchVar = 0.0  },
+        -- flap     = { path = "Sounds/flap.wav",     gain = 0.50, pitchVar = 0.05 },
+        -- shield   = { path = "Sounds/shield.wav",   gain = 0.60, pitchVar = 0.0  },
+        -- nearmiss = { path = "Sounds/nearmiss.wav", gain = 0.45, pitchVar = 0.04 },
+        -- fire     = { path = "Sounds/fire.wav",     gain = 0.60, pitchVar = 0.0  },
     },
 }
 
