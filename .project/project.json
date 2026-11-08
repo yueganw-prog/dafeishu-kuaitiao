@@ -5,7 +5,7 @@
     "id": "891232510"
   },
   "entry": "main.lua",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "taptap_publish": {
     "title": "大飞鼠快跑",
     "category": "casual",
@@ -23,11 +23,11 @@
     "icon_url": "https://img.tapimg.com/market/images/ef4719159691d7db73760cadfc67eac4.png"
   },
   "metadata": {
-    "updated_at": "2026-11-08T11:24:02.126Z"
+    "updated_at": "2026-11-08T13:54:42.486Z"
   },
   "test_qrcode": {
-    "url": "https://tapcode-sce.spark.xd.com/qrcode/m_07dj_1794137042010.png",
-    "generated_at": "2026-11-08T11:24:02.126Z"
+    "url": "https://tapcode-sce.spark.xd.com/qrcode/m_07dj_1794146082350.png",
+    "generated_at": "2026-11-08T13:54:42.486Z"
   },
   "dc_publish_sync": {
     "synced": false,

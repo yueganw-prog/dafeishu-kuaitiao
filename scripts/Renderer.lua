@@ -34,6 +34,27 @@ end
 function Renderer:init(ctx)
     self.ctx = ctx
     self.font = "sans"
+    self.playerImage = nil       -- 玩家贴图句柄（懒加载；nil = 未加载或加载失败，走矢量形象）
+    self.playerImageTried = false
+end
+
+--- 懒加载玩家贴图（Config.Player.imagePath）；失败只尝试一次，回退矢量飞鼠
+function Renderer:EnsurePlayerImage()
+    if self.playerImageTried then return end
+    self.playerImageTried = true
+
+    local path = Config.Player.imagePath
+    if path == nil or path == "" then return end
+
+    local ok, img = pcall(function()
+        return nvgCreateImage(self.ctx, path, 0)
+    end)
+    if ok and img ~= nil and img ~= 0 then
+        self.playerImage = img
+        print("[Renderer] player image loaded: " .. path)
+    else
+        print("[Renderer] player image missing/unloadable (" .. tostring(path) .. "), using vector fallback")
+    end
 end
 
 -- ---------------------------------------------------------------------------
@@ -473,74 +494,18 @@ function Renderer:DrawPlayer(game, time)
             sx, sy = p:GetStretch()
         end
 
+        self:EnsurePlayerImage()
+
         nvgSave(ctx)
         nvgTranslate(ctx, p.x, p.y)
         nvgRotate(ctx, tilt * math.pi / 180)
         nvgScale(ctx, sx, sy)
 
-        -- 1) 皮膜（滑翔翼）——先画，压在身体后面
-        nvgBeginPath(ctx)
-        nvgMoveTo(ctx, -r * 0.2, -r * 0.5)
-        nvgLineTo(ctx, -r * 1.9, r * 0.35)
-        nvgLineTo(ctx, -r * 0.15, r * 0.75)
-        nvgClosePath(ctx)
-        nvgFillColor(ctx, C(T.furMembrane, 215))
-        nvgFill(ctx)
-        nvgBeginPath(ctx)
-        nvgMoveTo(ctx, -r * 0.2, -r * 0.5)
-        nvgLineTo(ctx, -r * 1.9, r * 0.35)
-        nvgLineTo(ctx, -r * 0.15, r * 0.75)
-        nvgClosePath(ctx)
-        nvgStrokeColor(ctx, C(T.furDark, 200))
-        nvgStrokeWidth(ctx, 1.5)
-        nvgStroke(ctx)
-
-        -- 2) 尾巴
-        nvgBeginPath(ctx)
-        nvgMoveTo(ctx, -r * 0.75, -r * 0.1)
-        nvgBezierTo(ctx, -r * 1.55, -r * 0.5, -r * 1.7, r * 0.15, -r * 1.15, r * 0.5)
-        nvgStrokeColor(ctx, C(T.furDark))
-        nvgStrokeWidth(ctx, r * 0.42)
-        nvgStroke(ctx)
-
-        -- 3) 身体
-        local bodyGrd = nvgRadialGradient(ctx, -r * 0.2, -r * 0.3, r * 0.2, r * 1.25,
-            nvgRGBA(214, 180, 138, 255), C(T.furBody))
-        nvgBeginPath(ctx)
-        nvgEllipse(ctx, 0, 0, r * 1.05, r * 0.86)
-        nvgFillPaint(ctx, bodyGrd)
-        nvgFill(ctx)
-
-        -- 4) 头部
-        nvgBeginPath(ctx)
-        nvgCircle(ctx, r * 0.62, -r * 0.42, r * 0.55)
-        nvgFillColor(ctx, C(T.furMembrane))
-        nvgFill(ctx)
-
-        -- 5) 耳朵
-        nvgBeginPath(ctx)
-        nvgMoveTo(ctx, r * 0.4, -r * 0.85)
-        nvgLineTo(ctx, r * 0.52, -r * 1.35)
-        nvgLineTo(ctx, r * 0.82, -r * 0.9)
-        nvgClosePath(ctx)
-        nvgFillColor(ctx, C(T.furDark))
-        nvgFill(ctx)
-
-        -- 6) 眼睛
-        nvgBeginPath(ctx)
-        nvgCircle(ctx, r * 0.85, -r * 0.5, r * 0.19)
-        nvgFillColor(ctx, nvgRGBA(28, 26, 32, 255))
-        nvgFill(ctx)
-        nvgBeginPath(ctx)
-        nvgCircle(ctx, r * 0.9, -r * 0.57, r * 0.06)
-        nvgFillColor(ctx, nvgRGBA(255, 255, 255, 230))
-        nvgFill(ctx)
-
-        -- 7) 口鼻
-        nvgBeginPath(ctx)
-        nvgCircle(ctx, r * 1.1, -r * 0.28, r * 0.11)
-        nvgFillColor(ctx, nvgRGBA(232, 148, 142, 255))
-        nvgFill(ctx)
+        if self.playerImage then
+            self:DrawPlayerImageSprite(ctx, p)
+        else
+            self:DrawSquirrelVector(ctx, r)
+        end
 
         nvgRestore(ctx)
     end
@@ -594,6 +559,90 @@ function Renderer:DrawPlayer(game, time)
         nvgStrokeWidth(ctx, 2)
         nvgStroke(ctx)
     end
+end
+
+--- 贴图形象：等比缩放到 imageSize 宽，居中于碰撞圆心（在已旋转/挤压缩放的坐标系内绘制）
+---@param ctx NVGContextWrapper
+---@param p Player
+function Renderer:DrawPlayerImageSprite(ctx, p)
+    local iw, ih = nvgImageSize(ctx, self.playerImage)
+    local w = Config.Player.imageSize
+    local h = (iw > 0) and (w * ih / iw) or w
+    nvgBeginPath(ctx)
+    nvgRect(ctx, -w * 0.5, -h * 0.5, w, h)
+    nvgFillPaint(ctx, nvgImagePattern(ctx, -w * 0.5, -h * 0.5, w, h, 0, self.playerImage, 1.0))
+    nvgFill(ctx)
+end
+
+--- 矢量飞鼠（回退形象）：纯几何拼装，在已平移/旋转/挤压缩放的坐标系内以 (0,0) 为中心绘制
+---@param ctx NVGContextWrapper
+---@param r number 碰撞半径
+function Renderer:DrawSquirrelVector(ctx, r)
+    local T = Config.Theme
+
+    -- 1) 皮膜（滑翔翼）——先画，压在身体后面
+    nvgBeginPath(ctx)
+    nvgMoveTo(ctx, -r * 0.2, -r * 0.5)
+    nvgLineTo(ctx, -r * 1.9, r * 0.35)
+    nvgLineTo(ctx, -r * 0.15, r * 0.75)
+    nvgClosePath(ctx)
+    nvgFillColor(ctx, C(T.furMembrane, 215))
+    nvgFill(ctx)
+    nvgBeginPath(ctx)
+    nvgMoveTo(ctx, -r * 0.2, -r * 0.5)
+    nvgLineTo(ctx, -r * 1.9, r * 0.35)
+    nvgLineTo(ctx, -r * 0.15, r * 0.75)
+    nvgClosePath(ctx)
+    nvgStrokeColor(ctx, C(T.furDark, 200))
+    nvgStrokeWidth(ctx, 1.5)
+    nvgStroke(ctx)
+
+    -- 2) 尾巴
+    nvgBeginPath(ctx)
+    nvgMoveTo(ctx, -r * 0.75, -r * 0.1)
+    nvgBezierTo(ctx, -r * 1.55, -r * 0.5, -r * 1.7, r * 0.15, -r * 1.15, r * 0.5)
+    nvgStrokeColor(ctx, C(T.furDark))
+    nvgStrokeWidth(ctx, r * 0.42)
+    nvgStroke(ctx)
+
+    -- 3) 身体
+    local bodyGrd = nvgRadialGradient(ctx, -r * 0.2, -r * 0.3, r * 0.2, r * 1.25,
+        nvgRGBA(214, 180, 138, 255), C(T.furBody))
+    nvgBeginPath(ctx)
+    nvgEllipse(ctx, 0, 0, r * 1.05, r * 0.86)
+    nvgFillPaint(ctx, bodyGrd)
+    nvgFill(ctx)
+
+    -- 4) 头部
+    nvgBeginPath(ctx)
+    nvgCircle(ctx, r * 0.62, -r * 0.42, r * 0.55)
+    nvgFillColor(ctx, C(T.furMembrane))
+    nvgFill(ctx)
+
+    -- 5) 耳朵
+    nvgBeginPath(ctx)
+    nvgMoveTo(ctx, r * 0.4, -r * 0.85)
+    nvgLineTo(ctx, r * 0.52, -r * 1.35)
+    nvgLineTo(ctx, r * 0.82, -r * 0.9)
+    nvgClosePath(ctx)
+    nvgFillColor(ctx, C(T.furDark))
+    nvgFill(ctx)
+
+    -- 6) 眼睛
+    nvgBeginPath(ctx)
+    nvgCircle(ctx, r * 0.85, -r * 0.5, r * 0.19)
+    nvgFillColor(ctx, nvgRGBA(28, 26, 32, 255))
+    nvgFill(ctx)
+    nvgBeginPath(ctx)
+    nvgCircle(ctx, r * 0.9, -r * 0.57, r * 0.06)
+    nvgFillColor(ctx, nvgRGBA(255, 255, 255, 230))
+    nvgFill(ctx)
+
+    -- 7) 口鼻
+    nvgBeginPath(ctx)
+    nvgCircle(ctx, r * 1.1, -r * 0.28, r * 0.11)
+    nvgFillColor(ctx, nvgRGBA(232, 148, 142, 255))
+    nvgFill(ctx)
 end
 
 -- ---------------------------------------------------------------------------
