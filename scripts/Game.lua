@@ -366,6 +366,15 @@ function Game:EndRun(crashed)
         self.score, self.distanceScore, self.pickupScore, self.bonusScore, self.runTime))
 end
 
+--- 结算标语：按分数分档（<100 / 100~300 / >300）
+---@return string
+function Game:GetOverSlogan()
+    local G = Config.GameOver
+    if self.score < G.tier2Min then return G.slogan1 end
+    if self.score <= G.tier2Max then return G.slogan2 end
+    return G.slogan3
+end
+
 --- 供渲染层读取的 HUD 数据快照
 ---@return table
 function Game:GetHudData()

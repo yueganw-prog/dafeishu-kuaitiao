@@ -36,25 +36,47 @@ function Renderer:init(ctx)
     self.font = "sans"
     self.playerImage = nil       -- 玩家贴图句柄（懒加载；nil = 未加载或加载失败，走矢量形象）
     self.playerImageTried = false
+    self.gameOverFace = nil      -- 结算头像句柄（懒加载；nil = 未加载或加载失败，隐藏头像）
+    self.gameOverFaceTried = false
+    self.obstacleDemon = nil     -- 桩头恶魔句柄（懒加载；nil = 未加载或加载失败，纯树枝）
+    self.obstacleDemonTried = false
+end
+
+--- 懒加载图片资源的通用实现；失败只尝试一次
+---@param path string|nil
+---@return integer|nil img
+local function TryLoadImage(ctx, path, label)
+    if path == nil or path == "" then return nil end
+    local ok, img = pcall(function()
+        return nvgCreateImage(ctx, path, 0)
+    end)
+    if ok and img ~= nil and img ~= 0 then
+        print("[Renderer] " .. label .. " image loaded: " .. path)
+        return img
+    end
+    print("[Renderer] " .. label .. " image missing/unloadable (" .. tostring(path) .. ")")
+    return nil
 end
 
 --- 懒加载玩家贴图（Config.Player.imagePath）；失败只尝试一次，回退矢量飞鼠
 function Renderer:EnsurePlayerImage()
     if self.playerImageTried then return end
     self.playerImageTried = true
+    self.playerImage = TryLoadImage(self.ctx, Config.Player.imagePath, "player")
+end
 
-    local path = Config.Player.imagePath
-    if path == nil or path == "" then return end
+--- 懒加载结算头像（Config.GameOver.facePath）；失败只尝试一次，隐藏头像
+function Renderer:EnsureGameOverFace()
+    if self.gameOverFaceTried then return end
+    self.gameOverFaceTried = true
+    self.gameOverFace = TryLoadImage(self.ctx, Config.GameOver.facePath, "gameover")
+end
 
-    local ok, img = pcall(function()
-        return nvgCreateImage(self.ctx, path, 0)
-    end)
-    if ok and img ~= nil and img ~= 0 then
-        self.playerImage = img
-        print("[Renderer] player image loaded: " .. path)
-    else
-        print("[Renderer] player image missing/unloadable (" .. tostring(path) .. "), using vector fallback")
-    end
+--- 懒加载桩头恶魔（Config.Obstacle.demonPath）；失败只尝试一次，保持纯树枝
+function Renderer:EnsureObstacleDemon()
+    if self.obstacleDemonTried then return end
+    self.obstacleDemonTried = true
+    self.obstacleDemon = TryLoadImage(self.ctx, Config.Obstacle.demonPath, "obstacle")
 end
 
 -- ---------------------------------------------------------------------------
@@ -249,6 +271,8 @@ function Renderer:DrawObstacles(game)
     local groundY = game.groundY
     local ceilingY = game.ceilingY
 
+    self:EnsureObstacleDemon()
+
     for i = 1, #game.world.obstacles do
         local ob = game.world.obstacles[i]
 
@@ -256,14 +280,60 @@ function Renderer:DrawObstacles(game)
         local aboveH = ob.gapTop - ceilingY
         if aboveH > 0 then
             self:DrawBranch(ob.x, ceilingY, w, aboveH, false)
+            self:DrawObstacleDemon(ctx, ob.x, w, ceilingY, aboveH, false)
         end
 
         -- 下段：[gapBottom, groundY]
         local belowH = groundY - ob.gapBottom
         if belowH > 0 then
             self:DrawBranch(ob.x, ob.gapBottom, w, belowH, true)
+            self:DrawObstacleDemon(ctx, ob.x, w, ob.gapBottom, belowH, true)
         end
     end
+end
+
+--- 桩头恶魔：半身像"长"在朝向空隙的桩头上（上桩倒挂 / 下桩直立，头贴住空隙），
+--- 严格剪裁在树枝矩形内，恶魔像素绝不进入空隙（碰撞公平）
+---@param ctx NVGContextWrapper
+---@param x number 树枝左缘
+---@param w number 树枝宽
+---@param ry number 树枝矩形上缘 y
+---@param rh number 树枝矩形高
+---@param isBottom boolean true=下段（直立）；false=上段（倒挂）
+function Renderer:DrawObstacleDemon(ctx, x, w, ry, rh, isBottom)
+    if self.obstacleDemon == nil then return end
+    local O = Config.Obstacle
+    local iw, ih = nvgImageSize(ctx, self.obstacleDemon)
+    if iw <= 0 or ih <= 0 then return end
+
+    -- 高度按段高收紧，保证不侵入空隙；宽按等比回算
+    local h = math.min(O.demonWidth * ih / iw, rh - 2)
+    local dw = h * iw / ih
+    local dcx = x + w * 0.5
+
+    nvgSave(ctx)
+    -- 剪裁进树枝矩形（左右各放宽 2px 让恶魔"抱住"桩头，空隙侧零越界）
+    nvgIntersectScissor(ctx, x - 2, ry, w + 4, rh)
+
+    if isBottom then
+        -- 直立：头（贴图上缘）贴住矩形上缘（空隙侧）
+        nvgBeginPath(ctx)
+        nvgRect(ctx, dcx - dw * 0.5, ry, dw, h)
+        nvgFillPaint(ctx, nvgImagePattern(ctx, dcx - dw * 0.5, ry, dw, h, 0, self.obstacleDemon, 1.0))
+        nvgFill(ctx)
+    else
+        -- 倒挂：头贴住矩形下缘（空隙侧）
+        nvgSave(ctx)
+        nvgTranslate(ctx, dcx, ry + rh - h * 0.5)
+        nvgRotate(ctx, math.pi)
+        nvgBeginPath(ctx)
+        nvgRect(ctx, -dw * 0.5, -h * 0.5, dw, h)
+        nvgFillPaint(ctx, nvgImagePattern(ctx, -dw * 0.5, -h * 0.5, dw, h, 0, self.obstacleDemon, 1.0))
+        nvgFill(ctx)
+        nvgRestore(ctx)
+    end
+
+    nvgRestore(ctx)
 end
 
 --- 画一根树干（含树皮纹理与枝节）
@@ -838,8 +908,11 @@ function Renderer:DrawGameOverOverlay(game, logicalW, logicalH)
     nvgFillColor(ctx, nvgRGBA(10, 14, 24, 150 * t))
     nvgFill(ctx)
 
+    self:EnsureGameOverFace()
+    local hasFace = self.gameOverFace ~= nil
+
     local panelW = math.min(360, logicalW * 0.62)
-    local panelH = 200
+    local panelH = hasFace and Config.GameOver.panelHWithFace or Config.GameOver.panelHPlain
     local cx = logicalW * 0.5
     local cy = logicalH * 0.5
     local px = cx - panelW * 0.5
@@ -867,35 +940,56 @@ function Renderer:DrawGameOverOverlay(game, logicalW, logicalH)
     nvgFontFace(ctx, self.font)
     nvgTextAlign(ctx, NVG_ALIGN_CENTER + NVG_ALIGN_MIDDLE)
 
-    -- 标题
-    nvgFontSize(ctx, 28)
+    -- 结算形象（圆形裁切；贴图缺失时隐藏、面板收紧）
+    local sloganY = py + 40
+    if hasFace then
+        local G = Config.GameOver
+        local fs = G.faceSize
+        local fy = py + 16
+        nvgBeginPath(ctx)
+        nvgCircle(ctx, cx, fy + fs * 0.5, fs * 0.5)
+        nvgFillPaint(ctx, nvgImagePattern(ctx, cx - fs * 0.5, fy, fs, fs, 0, self.gameOverFace, 1.0))
+        nvgFill(ctx)
+        nvgBeginPath(ctx)
+        nvgCircle(ctx, cx, fy + fs * 0.5, fs * 0.5)
+        nvgStrokeColor(ctx, nvgRGBA(255, 178, 92, 150))
+        nvgStrokeWidth(ctx, 2)
+        nvgStroke(ctx)
+        sloganY = fy + fs + 24
+    end
+
+    -- 标语（按分数分档）
+    nvgFontSize(ctx, 26)
     nvgFillColor(ctx, C(T.danger))
-    nvgText(ctx, cx, py + 40, Config.Text.overTitle, nil)
+    nvgText(ctx, cx, sloganY, game:GetOverSlogan(), nil)
 
     -- 得分（滚动上涨）
+    local scoreY = sloganY + 44
     local reveal = Utils.Clamp((game.overTime - F.deathPanelDelay) / 0.6, 0, 1)
     local shown = math.floor(game.score * Utils.EaseOutCubic(reveal))
-    nvgFontSize(ctx, 46)
+    nvgFontSize(ctx, 44)
     nvgFillColor(ctx, C(T.text))
-    nvgText(ctx, cx, py + 92, tostring(shown), nil)
+    nvgText(ctx, cx, scoreY, tostring(shown), nil)
 
     -- 明细
+    local detailY = scoreY + 40
     nvgFontSize(ctx, 14)
     nvgFillColor(ctx, C(T.textDim))
-    nvgText(ctx, cx, py + 128, string.format("距离 %d  ·  松果 %d  ·  额外 %d  ·  用时 %.1fs",
+    nvgText(ctx, cx, detailY, string.format("距离 %d  ·  松果 %d  ·  额外 %d  ·  用时 %.1fs",
         game.distanceScore, game.pickupScore, game.bonusScore, game.runTime), nil)
 
     -- 最佳
+    local bestY = detailY + 24
     nvgFontSize(ctx, 15)
     nvgFillColor(ctx, nvgRGBA(255, 226, 140, 235))
-    nvgText(ctx, cx, py + 152, Config.Text.bestLabel .. " " .. game.bestScore, nil)
+    nvgText(ctx, cx, bestY, Config.Text.bestLabel .. " " .. game.bestScore, nil)
 
     -- 重开提示
     if game.overTime >= F.restartGate then
         local blink = 0.6 + 0.4 * math.sin(game.overTime * 5)
         nvgFontSize(ctx, 16)
         nvgFillColor(ctx, nvgRGBA(210, 222, 240, 255 * blink))
-        nvgText(ctx, cx, py + 180, Config.Text.overHint, nil)
+        nvgText(ctx, cx, bestY + 26, Config.Text.overHint, nil)
     end
 end
 
