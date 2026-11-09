@@ -1002,12 +1002,25 @@ function Renderer:DrawGameOverOverlay(game, logicalW, logicalH)
     nvgFillColor(ctx, nvgRGBA(255, 226, 140, 235))
     nvgText(ctx, cx, bestY, Config.Text.bestLabel .. " " .. game.bestScore, nil)
 
-    -- 重开提示
+    -- 重开提示 + 「换难度」按钮（命中判定见 Game:GetGameOverMenuButtonRect）
     if game.overTime >= F.restartGate then
         local blink = 0.6 + 0.4 * math.sin(game.overTime * 5)
         nvgFontSize(ctx, 16)
         nvgFillColor(ctx, nvgRGBA(210, 222, 240, 255 * blink))
         nvgText(ctx, cx, bestY + 26, Config.Text.overHint, nil)
+
+        local b = game:GetGameOverMenuButtonRect(logicalW, logicalH)
+        nvgBeginPath(ctx)
+        nvgRoundedRect(ctx, b.x, b.y, b.w, b.h, 12)
+        nvgFillColor(ctx, nvgRGBA(255, 255, 255, 26))
+        nvgFill(ctx)
+        nvgBeginPath(ctx)
+        nvgRoundedRect(ctx, b.x, b.y, b.w, b.h, 12)
+        nvgStrokeColor(ctx, nvgRGBA(210, 222, 240, 140))
+        nvgStrokeWidth(ctx, 1.5)
+        nvgStroke(ctx)
+        nvgFillColor(ctx, nvgRGBA(210, 222, 240, 235))
+        nvgText(ctx, b.x + b.w * 0.5, b.y + b.h * 0.5, "‹ 换难度", nil)
     end
 end
 

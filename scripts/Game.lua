@@ -176,8 +176,16 @@ function Game:PressDown(px, py)
         self.player:PressDown()
         self:FlapFeedback()
     elseif self.state == "gameover" then
-        -- 结算面板完全出来后才接受"再来一局"，避免手滑跳过
+        -- 结算面板完全出来后才接受操作，避免手滑跳过
         if self.overTime >= Config.Fx.restartGate then
+            -- 「换难度」按钮命中 → 回主菜单（按钮矩形与渲染层同源）
+            if px ~= nil and py ~= nil then
+                local b = self:GetGameOverMenuButtonRect(self.logicalW, self.logicalH)
+                if px >= b.x and px <= b.x + b.w and py >= b.y and py <= b.y + b.h then
+                    self:BackToMenu()
+                    return
+                end
+            end
             self:StartRun()
             self.player:PressDown()
             self:FlapFeedback()
@@ -426,6 +434,25 @@ function Game:GetOverSlogan()
     if self.score < G.tier2Min then return G.slogan1 end
     if self.score <= G.tier2Max then return G.slogan2 end
     return G.slogan3
+end
+
+--- 结算面板「换难度」按钮矩形（渲染与点击命中共用）
+---@param logicalW number
+---@param logicalH number
+---@return table {x,y,w,h}
+function Game:GetGameOverMenuButtonRect(logicalW, logicalH)
+    return { x = logicalW * 0.5 - 70, y = logicalH - 96, w = 140, h = 44 }
+end
+
+--- 回到主菜单（保留最佳成绩与所选难度，重置对局场景）
+function Game:BackToMenu()
+    self.state = "menu"
+    self.overTime = 0
+    self.fx:Reset()
+    Audio.StopAll()
+    self.player:Reset(self.logicalW, self.logicalH, self.groundY)
+    self.world:Reset(self.logicalW, self.logicalH, self.groundY, self.ceilingY)
+    print("[Game] back to menu (mode=" .. self.mode .. ")")
 end
 
 --- 供渲染层读取的 HUD 数据快照

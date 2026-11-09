@@ -5,7 +5,7 @@
     "id": "891232510"
   },
   "entry": "main.lua",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "taptap_publish": {
     "title": "大飞鼠快跑",
     "category": "casual",
@@ -41,17 +41,17 @@
     "cover_vertical_url": "https://img-tc.tapimg.com/market/images/Ft5uxlCVIjX_q8CQ3D_dYKVwpRob.png"
   },
   "metadata": {
-    "updated_at": "2026-11-08T15:31:23.571Z",
+    "updated_at": "2026-11-09T00:44:18.302Z",
     "promo_dependent_hash": "160194e471bbad7ca59a5bcbf11f36de"
   },
   "test_qrcode": {
-    "url": "https://tapcode-sce.spark.xd.com/qrcode/m_07dj_1794148192016.png",
-    "generated_at": "2026-11-08T14:29:52.120Z"
+    "url": "https://tapcode-sce.spark.xd.com/qrcode/m_07dj_1794185058156.png",
+    "generated_at": "2026-11-09T00:44:18.302Z"
   },
   "dc_publish_sync": {
     "synced": true,
     "dcVersion": "V-20261108",
-    "dcStatus": "INIT",
+    "dcStatus": "WAITING",
     "baseFields": {
       "title": "大飞鼠快跑",
       "description": "大飞鼠别吃别吃，哎一古",
