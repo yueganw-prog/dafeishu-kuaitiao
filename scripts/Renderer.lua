@@ -15,6 +15,7 @@
 
 local Config = require("Config")
 local Utils = require("Utils")
+local Skin = require("Skin")
 
 ---@class Renderer
 ---@field ctx NVGContextWrapper
@@ -632,15 +633,28 @@ function Renderer:DrawPlayer(game, time)
 end
 
 --- 贴图形象：等比缩放到 imageSize 宽，居中于碰撞圆心（在已旋转/挤压缩放的坐标系内绘制）
+--- 按当前选中皮肤取贴图与叠色；皮肤贴图缺失时回退默认贴图
 ---@param ctx NVGContextWrapper
 ---@param p Player
 function Renderer:DrawPlayerImageSprite(ctx, p)
-    local iw, ih = nvgImageSize(ctx, self.playerImage)
+    local entry = Skin.GetSelected()
+    local img = (entry and Skin.GetHandle(entry, ctx)) or self.playerImage
+    if img == nil then return end
+
+    local iw, ih = nvgImageSize(ctx, img)
     local w = Config.Player.imageSize
     local h = (iw > 0) and (w * ih / iw) or w
     nvgBeginPath(ctx)
     nvgRect(ctx, -w * 0.5, -h * 0.5, w, h)
-    nvgFillPaint(ctx, nvgImagePattern(ctx, -w * 0.5, -h * 0.5, w, h, 0, self.playerImage, 1.0))
+
+    local paint
+    if entry and entry.tint then
+        paint = nvgImagePatternTinted(ctx, -w * 0.5, -h * 0.5, w, h, 0, img,
+            nvgRGBA(entry.tint[1], entry.tint[2], entry.tint[3], 255))
+    else
+        paint = nvgImagePattern(ctx, -w * 0.5, -h * 0.5, w, h, 0, img, 1.0)
+    end
+    nvgFillPaint(ctx, paint)
     nvgFill(ctx)
 end
 
@@ -879,6 +893,59 @@ function Renderer:DrawMenuOverlay(game, logicalW, logicalH, time)
     nvgFillColor(ctx, C(T.textDim))
     nvgText(ctx, cx, cy + 6, Config.Text.subtitle, nil)
 
+    -- 皮肤选择卡（命中判定见 Game:GetSkinCardRects；锁定卡压暗并显示解锁分）
+    local cards = game:GetSkinCardRects(logicalW, logicalH)
+    for _, c in ipairs(cards) do
+        local entry = c.entry
+        local unlocked = Skin.IsUnlocked(entry)
+        local selected = Skin.GetSelected().id == entry.id
+
+        nvgBeginPath(ctx)
+        nvgRoundedRect(ctx, c.x, c.y, c.w, c.h, 10)
+        nvgFillColor(ctx, selected and nvgRGBA(255, 178, 92, 60) or nvgRGBA(255, 255, 255, 24))
+        nvgFill(ctx)
+        nvgBeginPath(ctx)
+        nvgRoundedRect(ctx, c.x, c.y, c.w, c.h, 10)
+        nvgStrokeColor(ctx, selected and nvgRGBA(255, 226, 140, 255) or nvgRGBA(210, 222, 240, 80))
+        nvgStrokeWidth(ctx, selected and 2 or 1)
+        nvgStroke(ctx)
+
+        -- 头像（上半 44px 区域等比缩放居中；锁定压暗，选中/解锁按条目叠色）
+        local img = Skin.GetHandle(entry, ctx)
+        if img then
+            local iw, ih = nvgImageSize(ctx, img)
+            if iw > 0 and ih > 0 then
+                local tw = c.w - 8
+                local scale = math.min(tw / iw, 44 / ih)
+                local dw, dh = iw * scale, ih * scale
+                local dx, dy = c.x + (c.w - dw) * 0.5, c.y + (44 - dh) * 0.5
+                local paint
+                if not unlocked then
+                    paint = nvgImagePatternTinted(ctx, dx, dy, dw, dh, 0, img, nvgRGBA(70, 70, 80, 255))
+                elseif entry.tint then
+                    paint = nvgImagePatternTinted(ctx, dx, dy, dw, dh, 0, img,
+                        nvgRGBA(entry.tint[1], entry.tint[2], entry.tint[3], 255))
+                else
+                    paint = nvgImagePattern(ctx, dx, dy, dw, dh, 0, img, 1.0)
+                end
+                nvgBeginPath(ctx)
+                nvgRect(ctx, dx, dy, dw, dh)
+                nvgFillPaint(ctx, paint)
+                nvgFill(ctx)
+            end
+        end
+
+        -- 名字 / 解锁门槛
+        nvgFontSize(ctx, 11)
+        if unlocked then
+            nvgFillColor(ctx, selected and nvgRGBA(255, 226, 140, 255) or C(T.textDim))
+            nvgText(ctx, c.x + c.w * 0.5, c.y + c.h - 10, entry.name, nil)
+        else
+            nvgFillColor(ctx, nvgRGBA(150, 150, 160, 220))
+            nvgText(ctx, c.x + c.w * 0.5, c.y + c.h - 10, entry.unlockScore .. "分", nil)
+        end
+    end
+
     -- 难度选择按钮（命中判定见 Game:GetModeButtonRects）
     local rects = game:GetModeButtonRects(logicalW, logicalH)
     nvgFontSize(ctx, 18)
@@ -901,7 +968,7 @@ function Renderer:DrawMenuOverlay(game, logicalW, logicalH, time)
     local blink = 0.55 + 0.45 * math.sin(time * 4)
     nvgFontSize(ctx, 20)
     nvgFillColor(ctx, nvgRGBA(255, 226, 140, 255 * blink))
-    nvgText(ctx, cx, cy + 178, Config.Text.startHint, nil)
+    nvgText(ctx, cx, cy + 210, Config.Text.startHint, nil)
 end
 
 -- ---------------------------------------------------------------------------

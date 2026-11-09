@@ -5,7 +5,7 @@
     "id": "891232510"
   },
   "entry": "main.lua",
-  "version": "1.0.7",
+  "version": "1.0.10",
   "taptap_publish": {
     "title": "大飞鼠快跑",
     "category": "casual",
@@ -17,31 +17,33 @@
     "miniapp_id": "tapmcfg0w0q0jetysd",
     "trial_note": "素材均来自网络，哎一古",
     "description": "大飞鼠别吃别吃，哎一古",
-    "gameplay_demo_video_id": 6071627,
-    "release_phase": "public_test"
+    "gameplay_demo_video_id": 6072291,
+    "release_phase": "official"
   },
   "assets": {
     "icon": "./_uploads/90581fa7121da8acb83ca2bc160c4af72ca20933d8a9180e1724c59b0cc2c204.png",
     "screenshots": [
       "./_uploads/19374047fc7fe1ba52e7bb1c58325ec4afe6e445be5a62e87050f2b8ff7208d4.jpg",
-      "./_uploads/19374047fc7fe1ba52e7bb1c58325ec4afe6e445be5a62e87050f2b8ff7208d4.jpg",
-      "./_uploads/19374047fc7fe1ba52e7bb1c58325ec4afe6e445be5a62e87050f2b8ff7208d4.jpg"
+      "./_uploads/04fc698a6b67daa162b047d0874fd949193aa2c49d223399dc81229c438ac4a5.png",
+      "./_uploads/24c5d3bcaa4077a0277896e1e322c722827a02dad62e795144c5db0a01adc23b.png"
     ],
     "promotional_image": "./game_material/PROMO_2026-11-08T15-25-05_01.jpg",
     "icon_url": "https://img-tc.tapimg.com/market/images/FpxjnjzsDSQCAQxT6XOxWOgHtcK8.png",
     "screenshot_urls": [
       "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg",
-      "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg",
-      "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg"
+      "https://img-tc.tapimg.com/market/images/FlzLrm-rkxgkbhkWjPbPZOB1HlVy.png",
+      "https://img-tc.tapimg.com/market/images/FtvpgA0fhigh2TKNXBuwLCmgmfWW.png"
     ],
     "promotional_image_url": "https://img-tc.tapimg.com/market/images/FnSeXjzLmS203Mny5Z4nEk3o_b9k.jpg",
-    "cover_horizontal": "./game_material/COVER_HORIZONTAL_2026-11-08T15-28-01_01.png",
-    "cover_horizontal_url": "https://img-tc.tapimg.com/market/images/FiQJJS8O4WSwR9Ghb2lTftQNt5sy.png",
-    "cover_vertical": "./_uploads/c0c6f62b033ed9c15ab82bcfa1a46bc2ec001b0b9bc1f548598c1c654adf2e33.png",
-    "cover_vertical_url": "https://img-tc.tapimg.com/market/images/Ft5uxlCVIjX_q8CQ3D_dYKVwpRob.png"
+    "cover_horizontal": "./game_material/COVER_HORIZONTAL_2026-11-09T01-15-08_01.png",
+    "cover_horizontal_url": "https://img-tc.tapimg.com/market/images/FshmyRLC5L7gQnGWdWEeGbPG07hD.png",
+    "cover_vertical": "./game_material/COVER_VERTICAL_2026-11-09T01-15-08_01.png",
+    "cover_vertical_url": "https://img-tc.tapimg.com/market/images/FgBMcCKXgzal9AfqJk-wRZaNISYF.png",
+    "square_promotional_image": "./game_material/SQUARE_PROMO_2026-11-09T01-12-12_01.jpg",
+    "square_promotional_image_url": "https://img-tc.tapimg.com/market/images/FirZdk7PtshvoyAXgUlcyYvGY3TG.jpg"
   },
   "metadata": {
-    "updated_at": "2026-11-09T00:44:18.302Z",
+    "updated_at": "2026-11-09T12:05:07.245Z",
     "promo_dependent_hash": "160194e471bbad7ca59a5bcbf11f36de"
   },
   "test_qrcode": {
@@ -50,7 +52,7 @@
   },
   "dc_publish_sync": {
     "synced": true,
-    "dcVersion": "V-20261108",
+    "dcVersion": "V-20261109-1",
     "dcStatus": "WAITING",
     "baseFields": {
       "title": "大飞鼠快跑",
@@ -59,16 +61,16 @@
       "trial_note": "素材均来自网络，哎一古",
       "icon_url": "https://img-tc.tapimg.com/market/images/FpxjnjzsDSQCAQxT6XOxWOgHtcK8.png",
       "banner_url": "https://img-tc.tapimg.com/market/images/FnSeXjzLmS203Mny5Z4nEk3o_b9k.jpg",
-      "square_promo_url": null,
-      "cover_horizontal_url": "https://img-tc.tapimg.com/market/images/FiQJJS8O4WSwR9Ghb2lTftQNt5sy.png",
-      "cover_vertical_url": "https://img-tc.tapimg.com/market/images/Ft5uxlCVIjX_q8CQ3D_dYKVwpRob.png",
+      "square_promo_url": "https://img-tc.tapimg.com/market/images/FirZdk7PtshvoyAXgUlcyYvGY3TG.jpg",
+      "cover_horizontal_url": "https://img-tc.tapimg.com/market/images/FshmyRLC5L7gQnGWdWEeGbPG07hD.png",
+      "cover_vertical_url": "https://img-tc.tapimg.com/market/images/FgBMcCKXgzal9AfqJk-wRZaNISYF.png",
       "screenshot_urls": [
         "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg",
-        "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg",
-        "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg"
+        "https://img-tc.tapimg.com/market/images/FlzLrm-rkxgkbhkWjPbPZOB1HlVy.png",
+        "https://img-tc.tapimg.com/market/images/FtvpgA0fhigh2TKNXBuwLCmgmfWW.png"
       ]
     },
     "pending": {},
-    "baseGameplayDemoVideoId": 6071627
+    "baseGameplayDemoVideoId": 6072291
   }
 }

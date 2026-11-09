@@ -18,6 +18,7 @@ local Player = require("Player")
 local World = require("World")
 local Fx = require("Fx")
 local Audio = require("Audio")
+local Skin = require("Skin")
 
 ---@class Game
 ---@field state string            "menu" | "playing" | "gameover"
@@ -73,6 +74,10 @@ function Game:init()
     self.fxAccum = 0
     self.mode = "hard"
     self:ApplyDifficulty(self.mode)
+
+    -- 存档：历史最佳分数跨局持久化，恢复上次所选皮肤
+    Skin.Load()
+    self.bestScore = Skin.GetBest()
 end
 
 --- 应用难度档位：把选中档位的数值覆盖进生效配置。
@@ -89,6 +94,30 @@ function Game:ApplyDifficulty(mode)
     for k, v in pairs(D.powerup or {}) do Config.Powerup[k] = v end
 end
 
+--- 菜单皮肤卡片条的矩形（渲染与点击命中共用）
+---@param logicalW number
+---@param logicalH number
+---@return table[] {skin,entry,x,y,w,h}
+function Game:GetSkinCardRects(logicalW, logicalH)
+    local cardW, cardH, gapX = 56, 72, 12
+    local count = #Config.Skins
+    local total = count * cardW + (count - 1) * gapX
+    local x0 = (logicalW - total) * 0.5
+    local y = logicalH * 0.5 + 44
+    local rects = {}
+    for i, entry in ipairs(Config.Skins) do
+        rects[i] = {
+            skin = entry.id,
+            entry = entry,
+            x = x0 + (i - 1) * (cardW + gapX),
+            y = y,
+            w = cardW,
+            h = cardH,
+        }
+    end
+    return rects
+end
+
 --- 菜单难度按钮的矩形（渲染与点击命中共用同一来源，保证对齐）
 ---@param logicalW number
 ---@param logicalH number
@@ -97,7 +126,7 @@ function Game:GetModeButtonRects(logicalW, logicalH)
     local bw, bh, gapX = 128, 46, 14
     local total = bw * 3 + gapX * 2
     local x0 = (logicalW - total) * 0.5
-    local y = logicalH * 0.5 + 108
+    local y = logicalH * 0.5 + 140
     local rects = {}
     for i, mode in ipairs({ "easy", "hard", "hell" }) do
         rects[i] = {
@@ -160,8 +189,16 @@ end
 ---@param py number|nil 按点 y
 function Game:PressDown(px, py)
     if self.state == "menu" then
-        -- 菜单态：先判难度按钮命中，命中只切档不开局
+        -- 菜单态：先判皮肤卡命中（点选换肤），再判难度按钮，都未命中则开局
         if px ~= nil and py ~= nil then
+            for _, c in ipairs(self:GetSkinCardRects(self.logicalW, self.logicalH)) do
+                if px >= c.x and px <= c.x + c.w and py >= c.y and py <= c.y + c.h then
+                    if Skin.IsUnlocked(c.entry) then
+                        Skin.Select(c.skin)
+                    end
+                    return
+                end
+            end
             for _, r in ipairs(self:GetModeButtonRects(self.logicalW, self.logicalH)) do
                 if px >= r.x and px <= r.x + r.w and py >= r.y and py <= r.y + r.h then
                     if self.mode ~= r.mode then
@@ -422,6 +459,7 @@ function Game:EndRun(crashed)
     if self.score > self.bestScore then
         self.bestScore = self.score
     end
+    Skin.SaveBest(self.bestScore)
 
     print(string.format("[Game] Run over - score=%d (distance=%d, pickup=%d, bonus=%d) time=%.1fs",
         self.score, self.distanceScore, self.pickupScore, self.bonusScore, self.runTime))

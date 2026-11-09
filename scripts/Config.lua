@@ -193,6 +193,18 @@ Config.Difficulty = {
 }
 
 -- ---------------------------------------------------------------------------
+-- 皮肤（形象库：加新形象 = 加一个条目 + 把图放进 assets/）
+-- tint 为乘法叠色（可省略=原色）；unlockScore = 解锁所需历史最佳分数
+-- ---------------------------------------------------------------------------
+Config.Skins = {
+    { id = "classic", name = "绅士·原色", image = "player.png", tint = nil,           unlockScore = 0 },
+    { id = "sunset",  name = "绅士·绯红", image = "player.png", tint = { 255, 120, 110 }, unlockScore = 0 },
+    { id = "jade",    name = "绅士·翡翠", image = "player.png", tint = { 110, 235, 170 }, unlockScore = 100 },
+    { id = "gold",    name = "绅士·鎏金", image = "player.png", tint = { 255, 210, 90 },  unlockScore = 300 },
+    { id = "violet",  name = "绅士·幻紫", image = "player.png", tint = { 185, 140, 255 }, unlockScore = 1000 },
+}
+
+-- ---------------------------------------------------------------------------
 -- 配色（深色森林风）
 -- ---------------------------------------------------------------------------
 Config.Theme = {
