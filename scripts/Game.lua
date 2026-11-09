@@ -71,6 +71,45 @@ function Game:init()
     self.comboTimer = 0
     self.scorePopT = 0
     self.fxAccum = 0
+    self.mode = "hard"
+    self:ApplyDifficulty(self.mode)
+end
+
+--- 应用难度档位：把选中档位的数值覆盖进生效配置。
+--- 说明：Config 是全项目唯一生效配置表（World/Player 都直读它），
+--- 档位切换即整表覆盖对应键；选择保持到下次改选，重开不重置。
+---@param mode string "easy" | "hard" | "hell"
+function Game:ApplyDifficulty(mode)
+    local D = Config.Difficulty[mode]
+    if not D then return end
+    self.mode = mode
+    for k, v in pairs(D.world or {}) do Config.World[k] = v end
+    for k, v in pairs(D.obstacle or {}) do Config.Obstacle[k] = v end
+    for k, v in pairs(D.player or {}) do Config.Player[k] = v end
+    for k, v in pairs(D.powerup or {}) do Config.Powerup[k] = v end
+end
+
+--- 菜单难度按钮的矩形（渲染与点击命中共用同一来源，保证对齐）
+---@param logicalW number
+---@param logicalH number
+---@return table[] {mode,label,x,y,w,h}
+function Game:GetModeButtonRects(logicalW, logicalH)
+    local bw, bh, gapX = 128, 46, 14
+    local total = bw * 3 + gapX * 2
+    local x0 = (logicalW - total) * 0.5
+    local y = logicalH * 0.5 + 108
+    local rects = {}
+    for i, mode in ipairs({ "easy", "hard", "hell" }) do
+        rects[i] = {
+            mode = mode,
+            label = Config.Difficulty[mode].label,
+            x = x0 + (i - 1) * (bw + gapX),
+            y = y,
+            w = bw,
+            h = bh,
+        }
+    end
+    return rects
 end
 
 --- 屏幕尺寸变化：重算地面线、顶部边界，并同步玩家/世界
@@ -117,8 +156,22 @@ function Game:StartRun()
 end
 
 --- 按下（触屏/鼠标按下、空格按下）
-function Game:PressDown()
+---@param px number|nil 按点 x（逻辑像素；键盘/无坐标为 nil）
+---@param py number|nil 按点 y
+function Game:PressDown(px, py)
     if self.state == "menu" then
+        -- 菜单态：先判难度按钮命中，命中只切档不开局
+        if px ~= nil and py ~= nil then
+            for _, r in ipairs(self:GetModeButtonRects(self.logicalW, self.logicalH)) do
+                if px >= r.x and px <= r.x + r.w and py >= r.y and py <= r.y + r.h then
+                    if self.mode ~= r.mode then
+                        self:ApplyDifficulty(r.mode)
+                        print("[Game] difficulty -> " .. r.mode)
+                    end
+                    return
+                end
+            end
+        end
         self:StartRun()
         self.player:PressDown()
         self:FlapFeedback()

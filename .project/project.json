@@ -14,40 +14,61 @@
     "app_platforms": "1,2",
     "app_id": 1040582,
     "developer_id": 527821,
-    "miniapp_id": "tapmcfg0w0q0jetysd"
+    "miniapp_id": "tapmcfg0w0q0jetysd",
+    "trial_note": "素材均来自网络，哎一古",
+    "description": "大飞鼠别吃别吃，哎一古",
+    "gameplay_demo_video_id": 6071627,
+    "release_phase": "public_test"
   },
   "assets": {
-    "icon": "",
-    "screenshots": [],
-    "promotional_image": "",
-    "icon_url": "https://img.tapimg.com/market/images/ef4719159691d7db73760cadfc67eac4.png"
+    "icon": "./_uploads/90581fa7121da8acb83ca2bc160c4af72ca20933d8a9180e1724c59b0cc2c204.png",
+    "screenshots": [
+      "./_uploads/19374047fc7fe1ba52e7bb1c58325ec4afe6e445be5a62e87050f2b8ff7208d4.jpg",
+      "./_uploads/19374047fc7fe1ba52e7bb1c58325ec4afe6e445be5a62e87050f2b8ff7208d4.jpg",
+      "./_uploads/19374047fc7fe1ba52e7bb1c58325ec4afe6e445be5a62e87050f2b8ff7208d4.jpg"
+    ],
+    "promotional_image": "./game_material/PROMO_2026-11-08T15-25-05_01.jpg",
+    "icon_url": "https://img-tc.tapimg.com/market/images/FpxjnjzsDSQCAQxT6XOxWOgHtcK8.png",
+    "screenshot_urls": [
+      "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg",
+      "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg",
+      "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg"
+    ],
+    "promotional_image_url": "https://img-tc.tapimg.com/market/images/FnSeXjzLmS203Mny5Z4nEk3o_b9k.jpg",
+    "cover_horizontal": "./game_material/COVER_HORIZONTAL_2026-11-08T15-28-01_01.png",
+    "cover_horizontal_url": "https://img-tc.tapimg.com/market/images/FiQJJS8O4WSwR9Ghb2lTftQNt5sy.png",
+    "cover_vertical": "./_uploads/c0c6f62b033ed9c15ab82bcfa1a46bc2ec001b0b9bc1f548598c1c654adf2e33.png",
+    "cover_vertical_url": "https://img-tc.tapimg.com/market/images/Ft5uxlCVIjX_q8CQ3D_dYKVwpRob.png"
   },
   "metadata": {
-    "updated_at": "2026-11-08T14:29:52.120Z"
+    "updated_at": "2026-11-08T15:31:23.571Z",
+    "promo_dependent_hash": "160194e471bbad7ca59a5bcbf11f36de"
   },
   "test_qrcode": {
     "url": "https://tapcode-sce.spark.xd.com/qrcode/m_07dj_1794148192016.png",
     "generated_at": "2026-11-08T14:29:52.120Z"
   },
   "dc_publish_sync": {
-    "synced": false,
+    "synced": true,
     "dcVersion": "V-20261108",
     "dcStatus": "INIT",
     "baseFields": {
       "title": "大飞鼠快跑",
-      "description": "",
+      "description": "大飞鼠别吃别吃，哎一古",
       "category": "casual",
-      "trial_note": "",
-      "icon_url": "https://img.tapimg.com/market/images/ef4719159691d7db73760cadfc67eac4.png",
-      "banner_url": "",
-      "square_promo_url": "",
-      "cover_horizontal_url": "",
-      "cover_vertical_url": "",
-      "screenshot_urls": []
+      "trial_note": "素材均来自网络，哎一古",
+      "icon_url": "https://img-tc.tapimg.com/market/images/FpxjnjzsDSQCAQxT6XOxWOgHtcK8.png",
+      "banner_url": "https://img-tc.tapimg.com/market/images/FnSeXjzLmS203Mny5Z4nEk3o_b9k.jpg",
+      "square_promo_url": null,
+      "cover_horizontal_url": "https://img-tc.tapimg.com/market/images/FiQJJS8O4WSwR9Ghb2lTftQNt5sy.png",
+      "cover_vertical_url": "https://img-tc.tapimg.com/market/images/Ft5uxlCVIjX_q8CQ3D_dYKVwpRob.png",
+      "screenshot_urls": [
+        "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg",
+        "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg",
+        "https://img-tc.tapimg.com/market/images/FmsWElyTX0Clogm0bMZnPRhOlISk.jpg"
+      ]
     },
-    "pending": {
-      "icon_url": "https://img.tapimg.com/market/images/ef4719159691d7db73760cadfc67eac4.png"
-    },
-    "baseGameplayDemoVideoId": 0
+    "pending": {},
+    "baseGameplayDemoVideoId": 6071627
   }
 }

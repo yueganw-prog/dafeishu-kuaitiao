@@ -75,6 +75,9 @@ function World:init()
     self.pickups = {}
     self.powerups = {}
     self.obstacleTimer = 0
+    self.nextObstacleInterval = self:NextObstacleInterval()
+    self.lastInterval = 1.2       -- 上一次生成间隔（纵向衔接约束用）
+    self.prevGapCenter = nil      -- 上一组空隙中心 y（nil = 尚无，首组不约束）
     self.pickupTimer = 0
     self.nextPickupInterval = Utils.RandRange(
         Config.Pickup.spawnIntervalMin, Config.Pickup.spawnIntervalMax)
@@ -166,8 +169,10 @@ function World:Update(dt, player)
 
     -- 4) 生成
     self.obstacleTimer = self.obstacleTimer + dt
-    if self.obstacleTimer >= self:NextObstacleInterval() then
+    if self.obstacleTimer >= self.nextObstacleInterval then
         self.obstacleTimer = 0
+        self.lastInterval = self.nextObstacleInterval
+        self.nextObstacleInterval = self:NextObstacleInterval()
         self:SpawnObstacle()
     end
 
@@ -260,6 +265,23 @@ function World:SpawnObstacle()
     if gapTopMax < gapTopMin then gapTopMax = gapTopMin end
 
     local gapTop = Utils.RandRange(gapTopMin, gapTopMax)
+
+    -- 纵向衔接约束：新空隙中心相对上一组空隙中心的位移，不得超过玩家在该
+    -- 生成间隔内可达的爬升/坠落距离——修复"上一组很低、下一组很高根本爬不上去"
+    local center = gapTop + gap * 0.5
+    if self.prevGapCenter then
+        local W = Config.World
+        local climb = math.abs(Config.Player.maxRiseSpeed) * self.lastInterval * W.maxStepFactor
+        local drop = Config.Player.maxFallSpeed * self.lastInterval * W.maxStepFactor
+        local delta = center - self.prevGapCenter
+        if delta > drop then
+            center = self.prevGapCenter + drop
+        elseif delta < -climb then
+            center = self.prevGapCenter - climb
+        end
+        gapTop = Utils.Clamp(center - gap * 0.5, gapTopMin, gapTopMax)
+    end
+
     table.insert(self.obstacles, {
         x = self.logicalW + O.width,
         gapTop = gapTop,
@@ -267,6 +289,7 @@ function World:SpawnObstacle()
         passed = false,
         minClear = math.huge,
     })
+    self.prevGapCenter = gapTop + gap * 0.5
 end
 
 --- 生成一个松果（优先落在当前空隙附近，保证可吃到）

@@ -879,11 +879,29 @@ function Renderer:DrawMenuOverlay(game, logicalW, logicalH, time)
     nvgFillColor(ctx, C(T.textDim))
     nvgText(ctx, cx, cy + 6, Config.Text.subtitle, nil)
 
-    -- 开始提示（呼吸闪烁）
+    -- 难度选择按钮（命中判定见 Game:GetModeButtonRects）
+    local rects = game:GetModeButtonRects(logicalW, logicalH)
+    nvgFontSize(ctx, 18)
+    for _, r in ipairs(rects) do
+        local selected = game.mode == r.mode
+        nvgBeginPath(ctx)
+        nvgRoundedRect(ctx, r.x, r.y, r.w, r.h, 12)
+        nvgFillColor(ctx, selected and nvgRGBA(255, 178, 92, 240) or nvgRGBA(255, 255, 255, 30))
+        nvgFill(ctx)
+        nvgBeginPath(ctx)
+        nvgRoundedRect(ctx, r.x, r.y, r.w, r.h, 12)
+        nvgStrokeColor(ctx, selected and nvgRGBA(255, 226, 140, 255) or nvgRGBA(210, 222, 240, 90))
+        nvgStrokeWidth(ctx, selected and 2.5 or 1.5)
+        nvgStroke(ctx)
+        nvgFillColor(ctx, selected and nvgRGBA(34, 32, 28, 255) or C(T.text))
+        nvgText(ctx, r.x + r.w * 0.5, r.y + r.h * 0.5, r.label, nil)
+    end
+
+    -- 开始提示（呼吸闪烁，按钮下方）
     local blink = 0.55 + 0.45 * math.sin(time * 4)
     nvgFontSize(ctx, 20)
     nvgFillColor(ctx, nvgRGBA(255, 226, 140, 255 * blink))
-    nvgText(ctx, cx, cy + 68, Config.Text.startHint, nil)
+    nvgText(ctx, cx, cy + 178, Config.Text.startHint, nil)
 end
 
 -- ---------------------------------------------------------------------------

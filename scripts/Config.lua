@@ -12,11 +12,12 @@ local Config = {}
 -- ---------------------------------------------------------------------------
 Config.World = {
     groundHeightRatio = 0.12,   -- 地面占屏幕高度比例
-    scrollSpeedStart  = 200,    -- 初始滚动速度（竖屏视距短，整体比横屏降一档）
+    scrollSpeedStart  = 200,    -- 初始滚动速度
     scrollSpeedMax    = 520,    -- 速度上限
     difficultyTime    = 75,     -- 难度从 0 到 1 的时长（smoothstep 曲线）
     breatherEvery     = 4,      -- 每生成多少组障碍安排一次"呼吸段"（空隙放宽）
     breatherGapBonus  = 1.18,   -- 呼吸段空隙放大倍率
+    maxStepFactor     = 0.75,   -- 相邻空隙中心垂直位移的可达系数（×爬升/坠落速度×间隔）
 }
 
 -- ---------------------------------------------------------------------------
@@ -26,12 +27,12 @@ Config.Player = {
     xRatio            = 0.26,   -- 水平固定位置（占屏宽比例）
     radius            = 17,     -- 碰撞半径
     gravity           = 1150,   -- 自然下落加速度
-    holdAccel         = -2600,  -- 按住滑翔的全推力
+    holdAccel         = -2350,  -- 按住滑翔的全推力
     thrustRampTime    = 0.12,   -- 按住后推力从重力"咬合"到全推力的时间
     thrustReleaseTime = 0.06,   -- 松手后推力泄回重力的时间
-    flapImpulse       = 480,    -- 点按扇翅冲量（瞬时抵消的下落速度）
+    flapImpulse       = 430,    -- 点按扇翅冲量（瞬时抵消的下落速度）
     maxFallSpeed      = 720,    -- 最大下落速度
-    maxRiseSpeed      = -400,   -- 最大上升速度
+    maxRiseSpeed      = -380,   -- 最大上升速度
     tiltMaxDeg        = 30,     -- 最大俯仰角（纯视觉）
     tiltLerp          = 9,      -- 角度跟随速度
     ceilingRestitution = 0.25,  -- 顶到天花板的反弹系数（弹簧感，不死）
@@ -154,6 +155,41 @@ Config.GameOver = {
     slogan1        = "我会将你打回现实",
     slogan2        = "百万雄师随我出征",
     slogan3        = "春风若有怜花意",
+}
+
+-- ---------------------------------------------------------------------------
+-- 难度档位（菜单可选：简单 / 困难 / 地狱）
+-- 每档在开局选择时覆盖进生效配置（Config.World/Obstacle/Player/Powerup 的对应键）
+-- maxStepFactor：相邻空隙中心垂直位移 = 爬升|下坠速度 × 障碍间隔 × 该系数
+-- ---------------------------------------------------------------------------
+Config.Difficulty = {
+    easy = {
+        label    = "简单",
+        world    = { scrollSpeedStart = 170, scrollSpeedMax = 420, difficultyTime = 90,
+                     breatherEvery = 3, breatherGapBonus = 1.25, maxStepFactor = 0.6 },
+        obstacle = { gapMin = 190, gapMax = 235, gapShrink = 18,
+                     spawnIntervalMin = 1.05, spawnIntervalMax = 1.7 },
+        player   = { flapImpulse = 530, holdAccel = -2850, maxRiseSpeed = -430 },
+        powerup  = { spawnIntervalMin = 7, spawnIntervalMax = 11 },
+    },
+    hard = {
+        label    = "困难",
+        world    = { scrollSpeedStart = 200, scrollSpeedMax = 520, difficultyTime = 75,
+                     breatherEvery = 4, breatherGapBonus = 1.18, maxStepFactor = 0.75 },
+        obstacle = { gapMin = 168, gapMax = 210, gapShrink = 26,
+                     spawnIntervalMin = 0.92, spawnIntervalMax = 1.55 },
+        player   = { flapImpulse = 430, holdAccel = -2350, maxRiseSpeed = -380 },
+        powerup  = { spawnIntervalMin = 9, spawnIntervalMax = 14 },
+    },
+    hell = {
+        label    = "地狱",
+        world    = { scrollSpeedStart = 260, scrollSpeedMax = 700, difficultyTime = 45,
+                     breatherEvery = 6, breatherGapBonus = 1.08, maxStepFactor = 1.15 },
+        obstacle = { gapMin = 148, gapMax = 185, gapShrink = 34,
+                     spawnIntervalMin = 0.75, spawnIntervalMax = 1.3 },
+        player   = { flapImpulse = 400, holdAccel = -2200, maxRiseSpeed = -360 },
+        powerup  = { spawnIntervalMin = 12, spawnIntervalMax = 18 },
+    },
 }
 
 -- ---------------------------------------------------------------------------

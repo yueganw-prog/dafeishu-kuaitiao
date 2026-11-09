@@ -169,11 +169,20 @@ end
 -- 输入
 -- ---------------------------------------------------------------------------
 
+--- 事件坐标 → 逻辑坐标（模式 B：逻辑 = 物理 / DPR）
+local function ToLogical(x, y)
+    if dpr_ == nil or dpr_ <= 0 then dpr_ = 1 end
+    return x / dpr_, y / dpr_
+end
+
 ---@param eventType string
 ---@param eventData MouseButtonDownEventData
 function HandleMouseButtonDown(eventType, eventData)
     if eventData["Button"]:GetInt() ~= MOUSEB_LEFT then return end
-    if game_ then game_:PressDown() end
+    if game_ then
+        local lx, ly = ToLogical(eventData["X"]:GetInt(), eventData["Y"]:GetInt())
+        game_:PressDown(lx, ly)
+    end
 end
 
 ---@param eventType string
@@ -186,7 +195,10 @@ end
 ---@param eventType string
 ---@param eventData TouchBeginEventData
 function HandleTouchBegin(eventType, eventData)
-    if game_ then game_:PressDown() end
+    if game_ then
+        local lx, ly = ToLogical(eventData["X"]:GetInt(), eventData["Y"]:GetInt())
+        game_:PressDown(lx, ly)
+    end
 end
 
 ---@param eventType string
