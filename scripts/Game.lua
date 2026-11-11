@@ -78,6 +78,10 @@ function Game:init()
     -- 存档：历史最佳分数跨局持久化，恢复上次所选皮肤
     Skin.Load()
     self.bestScore = Skin.GetBest()
+    -- 云端存档异步到达时刷新最佳分（取合并后最大值）
+    Skin.OnCloudMerge = function()
+        self.bestScore = Skin.GetBest()
+    end
 end
 
 --- 应用难度档位：把选中档位的数值覆盖进生效配置。
