@@ -203,6 +203,7 @@ Config.Skins = {
     { id = "jade",    name = "翡翠", image = "skins/jade.png",    unlockScore = 100 },
     { id = "gold",    name = "鎏金", image = "skins/gold.png",    unlockScore = 300 },
     { id = "violet",  name = "幻紫", image = "skins/violet.png",  unlockScore = 1000 },
+    { id = "tiger",   name = "虎胖", image = "skins/tiger.png",   unlockScore = 0 },
 }
 
 -- ---------------------------------------------------------------------------
